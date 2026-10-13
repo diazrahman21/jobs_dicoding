@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\EmploymentType;
+use App\Models\User;
 use App\Models\Vacancy;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -21,6 +22,7 @@ class VacancyFactory extends Factory
         $salaryMin = fake()->numberBetween(4_000_000, 15_000_000);
 
         return [
+            'user_id' => User::factory()->recruiter(),
             'title' => fake()->randomElement([
                 'Backend Engineer',
                 'Frontend Engineer',

@@ -2,6 +2,8 @@
 
 namespace Database\Seeders;
 
+use App\Enums\UserRole;
+use App\Models\User;
 use App\Models\Vacancy;
 use Illuminate\Database\Seeder;
 
@@ -12,7 +14,12 @@ class VacancySeeder extends Seeder
      */
     public function run(): void
     {
-        Vacancy::factory()->create([
+        $recruiter = User::query()
+            ->where('role', UserRole::Recruiter->value)
+            ->first()
+            ?? User::factory()->recruiter()->create();
+
+        Vacancy::factory()->for($recruiter)->create([
             'title' => 'Backend Engineer',
             'company_name' => 'PT Teknologi Nusantara',
             'location' => 'Jakarta',
@@ -23,7 +30,7 @@ class VacancySeeder extends Seeder
             'requirements' => 'Menguasai PHP/Laravel, MySQL, REST API, dan Git.',
         ]);
 
-        Vacancy::factory()->create([
+        Vacancy::factory()->for($recruiter)->create([
             'title' => 'Frontend Engineer',
             'company_name' => 'PT Digital Kreasi',
             'location' => 'Bandung',
@@ -34,7 +41,7 @@ class VacancySeeder extends Seeder
             'requirements' => 'Menguasai JavaScript, TypeScript, React/Next.js, dan CSS modern.',
         ]);
 
-        Vacancy::factory()->create([
+        Vacancy::factory()->for($recruiter)->create([
             'title' => 'UI/UX Designer',
             'company_name' => 'PT Karya Digital',
             'location' => 'Yogyakarta',
@@ -45,6 +52,6 @@ class VacancySeeder extends Seeder
             'requirements' => 'Menguasai Figma, riset pengguna, dan design system.',
         ]);
 
-        Vacancy::factory()->count(17)->create();
+        Vacancy::factory()->count(17)->for($recruiter)->create();
     }
 }

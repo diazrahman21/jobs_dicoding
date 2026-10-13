@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 use Illuminate\Http\Response;
+use Illuminate\Support\Facades\Gate;
 
 class VacancyController extends Controller
 {
@@ -27,7 +28,9 @@ class VacancyController extends Controller
 
     public function store(StoreVacancyRequest $request): JsonResponse
     {
-        $vacancy = Vacancy::create($request->validated());
+        $vacancy = $request->user()
+            ->vacancies()
+            ->create($request->validated());
 
         return (new VacancyResource($vacancy))
             ->response()
@@ -41,6 +44,8 @@ class VacancyController extends Controller
 
     public function update(UpdateVacancyRequest $request, Vacancy $vacancy): VacancyResource
     {
+        Gate::authorize('update', $vacancy);
+
         $vacancy->update($request->validated());
 
         return new VacancyResource($vacancy);
@@ -48,6 +53,8 @@ class VacancyController extends Controller
 
     public function destroy(Vacancy $vacancy): Response
     {
+        Gate::authorize('delete', $vacancy);
+
         $vacancy->delete();
 
         return response()->noContent();
