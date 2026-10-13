@@ -36,6 +36,7 @@ export type ExperienceLevel = (typeof EXPERIENCE_LEVELS)[number];
 export interface Vacancy {
   id: number;
   user_id: number;
+  is_saved: boolean;
   title: string;
   position: string | null;
   company_name: string;

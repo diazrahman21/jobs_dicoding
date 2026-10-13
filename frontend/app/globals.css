@@ -39,6 +39,21 @@ body {
   letter-spacing: -0.011em;
 }
 
+@keyframes page-enter {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-page-enter {
+  animation: page-enter 0.45s ease-out;
+}
+
 /* Hero section ported from Dicoding Jobs list page */
 .HeaderPage_header-intro__Y2jj1 {
   background: #18181b;

@@ -486,7 +486,7 @@ function Field({
         className="text-base leading-[22px] text-zinc-900"
       >
         {label}
-        {required ? " *" : ""}
+        {required ? <span className="text-red-500"> *</span> : null}
       </label>
       {children}
       {hint ? (

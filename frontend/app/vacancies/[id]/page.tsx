@@ -222,6 +222,13 @@ export default function VacancyDetailPage() {
         </section>
       ) : null}
 
+      <section className="rounded-card border border-slate-200 bg-white p-6 shadow-sm">
+        <h2 className="text-lg font-semibold text-slate-900">Informasi Tambahan</h2>
+        <p className="mt-2 whitespace-pre-line text-sm leading-relaxed text-slate-700">
+          Kandidat yang dibutuhkan: {vacancy.candidates_needed ?? "-"}
+        </p>
+      </section>
+
       <p className="text-xs text-slate-500">
         Dipasang pada {formatDate(vacancy.created_at)}
       </p>

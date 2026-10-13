@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\ApplicationController;
 use App\Http\Controllers\Api\AuthController;
+use App\Http\Controllers\Api\SavedVacancyController;
 use App\Http\Controllers\Api\VacancyController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,5 +26,9 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::middleware('role:job_seeker')->group(function () {
         Route::get('/applications', [ApplicationController::class, 'index']);
         Route::post('/vacancies/{vacancy}/applications', [ApplicationController::class, 'store']);
+
+        Route::get('/saved-vacancies', [SavedVacancyController::class, 'index']);
+        Route::post('/vacancies/{vacancy}/save', [SavedVacancyController::class, 'store']);
+        Route::delete('/vacancies/{vacancy}/save', [SavedVacancyController::class, 'destroy']);
     });
 });

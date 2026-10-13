@@ -56,9 +56,10 @@ export function Header() {
               ) : (
                 <Link
                   href="/my-applications"
+                  data-testid="my-applications-link"
                   className="text-slate-700 hover:text-brand-700"
                 >
-                  Lamaran Saya
+                  Lowongan Saya
                 </Link>
               )}
               <span
@@ -74,7 +75,7 @@ export function Header() {
                 type="button"
                 onClick={handleLogout}
                 data-testid="logout-button"
-                className="rounded-lg border border-slate-300 px-3 py-2 text-slate-700 transition hover:bg-slate-50"
+                className="rounded-lg border border-slate-300 px-3 py-2 text-slate-700 transition hover:border-red-500 hover:bg-red-500 hover:text-white active:bg-red-600 active:shadow-[0_0_0_4px_rgba(239,68,68,0.35)] focus:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
               >
                 Keluar
               </button>

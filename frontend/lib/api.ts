@@ -141,6 +141,37 @@ export function deleteVacancy(
   return request<void>(`/vacancies/${id}`, { method: "DELETE" });
 }
 
+export function getSavedVacancies(params?: {
+  page?: number;
+}): Promise<Paginated<Vacancy>> {
+  const query = new URLSearchParams();
+  if (params?.page && params.page > 1) {
+    query.set("page", String(params.page));
+  }
+  const suffix = query.toString();
+  return request<Paginated<Vacancy>>(
+    `/saved-vacancies${suffix ? `?${suffix}` : ""}`,
+  );
+}
+
+export function saveVacancy(
+  id: string | number,
+): Promise<{ message: string; saved: boolean }> {
+  return request<{ message: string; saved: boolean }>(
+    `/vacancies/${id}/save`,
+    { method: "POST" },
+  );
+}
+
+export function unsaveVacancy(
+  id: string | number,
+): Promise<{ message: string; saved: boolean }> {
+  return request<{ message: string; saved: boolean }>(
+    `/vacancies/${id}/save`,
+    { method: "DELETE" },
+  );
+}
+
 export function register(input: RegisterInput): Promise<AuthResponse> {
   return request<AuthResponse>("/register", {
     method: "POST",
