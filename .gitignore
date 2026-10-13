@@ -1,0 +1,36 @@
+# Dependencies
+node_modules/
+vendor/
+
+# Environment files (never commit secrets)
+.env
+.env.*
+!.env.example
+
+# Build output
+.next/
+out/
+dist/
+build/
+
+# Laravel
+backend/public/build/
+backend/public/hot
+backend/storage/*.key
+
+# Test artifacts
+playwright-report/
+test-results/
+coverage/
+.phpunit.result.cache
+.phpunit.cache/
+
+# Logs
+*.log
+npm-debug.log*
+
+# OS / editors
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
