@@ -66,6 +66,14 @@ class Vacancy extends Model
             return $query;
         }
 
-        return $query->where('title', 'like', "%{$term}%");
+        return $query->where(function (Builder $query) use ($term) {
+            $query->where('title', 'like', "%{$term}%")
+                ->orWhere('company_name', 'like', "%{$term}%");
+        });
+    }
+
+    public function scopeSearch(Builder $query, ?string $term): Builder
+    {
+        return $query->searchByTitle($term);
     }
 }

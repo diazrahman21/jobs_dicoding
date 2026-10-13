@@ -5,6 +5,7 @@ import "./globals.css";
 import { AuthProvider } from "@/components/AuthProvider";
 import { Header } from "@/components/Header";
 import { QueryProvider } from "@/components/QueryProvider";
+import { RouteHero } from "@/components/RouteHero";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -23,7 +24,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <QueryProvider>
           <AuthProvider>
             <Header />
-            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
+            <RouteHero />
+            <main className="mx-auto w-full max-w-6xl flex-1 px-4 py-8 sm:px-6">
               {children}
             </main>
             <footer className="border-t border-slate-200 bg-white">

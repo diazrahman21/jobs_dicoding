@@ -164,7 +164,7 @@ Endpoint **publik**:
 | `POST` | `/register`          | Daftar akun (`role`: recruiter/job_seeker) |
 | `POST` | `/login`             | Login, mengembalikan `{ user, token }`     |
 | `GET`  | `/vacancies`         | Daftar lowongan (terbaru dulu, 10/halaman) |
-| `GET`  | `/vacancies?search=` | Filter daftar berdasarkan judul (title)    |
+| `GET`  | `/vacancies?search=` | Filter daftar berdasarkan judul (title) atau nama perusahaan (company name) |
 | `GET`  | `/vacancies?page=2`  | Paginasi                                   |
 | `GET`  | `/vacancies/{id}`    | Detail lowongan (404 JSON bila tidak ada)  |
 

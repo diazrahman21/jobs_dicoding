@@ -9,12 +9,12 @@ interface SearchBarProps {
 export function SearchBar({
   value,
   onChange,
-  placeholder = "Cari lowongan berdasarkan judul...",
+  placeholder = "Cari lowongan berdasarkan judul atau perusahaan...",
 }: SearchBarProps) {
   return (
     <div className="relative w-full">
       <label htmlFor="search-input" className="sr-only">
-        Cari lowongan berdasarkan judul
+        Cari lowongan berdasarkan judul atau perusahaan
       </label>
       <svg
         aria-hidden="true"

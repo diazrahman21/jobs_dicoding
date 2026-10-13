@@ -26,7 +26,7 @@ export default function HomePage() {
   const meta = data?.meta;
 
   return (
-    <section className="flex flex-col gap-6">
+    <section className="-mt-6 flex flex-col gap-6 rounded-t-[32px] bg-white px-4 pt-10 shadow-sm sm:px-6">
       <div className="flex flex-col gap-2">
         <h1 className="text-2xl font-bold text-slate-900 sm:text-3xl">
           Temukan Lowongan Impianmu

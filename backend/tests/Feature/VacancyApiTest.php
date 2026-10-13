@@ -132,9 +132,9 @@ class VacancyApiTest extends TestCase
     #[Test]
     public function it_searches_vacancies_by_title(): void
     {
-        Vacancy::factory()->create(['title' => 'Backend Engineer']);
-        Vacancy::factory()->create(['title' => 'Frontend Engineer']);
-        Vacancy::factory()->create(['title' => 'UI/UX Designer']);
+        Vacancy::factory()->create(['title' => 'Backend Engineer', 'company_name' => 'PT Contoh']);
+        Vacancy::factory()->create(['title' => 'Frontend Engineer', 'company_name' => 'PT Contoh']);
+        Vacancy::factory()->create(['title' => 'UI/UX Designer', 'company_name' => 'PT Contoh']);
 
         $response = $this->getJson('/api/vacancies?search=Backend');
 

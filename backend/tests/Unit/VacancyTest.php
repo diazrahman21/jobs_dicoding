@@ -17,8 +17,8 @@ class VacancyTest extends TestCase
     #[Test]
     public function search_by_title_matches_partial_term(): void
     {
-        Vacancy::factory()->create(['title' => 'Backend Engineer']);
-        Vacancy::factory()->create(['title' => 'UI/UX Designer']);
+        Vacancy::factory()->create(['title' => 'Backend Engineer', 'company_name' => 'PT Contoh']);
+        Vacancy::factory()->create(['title' => 'UI/UX Designer', 'company_name' => 'PT Karya']);
 
         $results = Vacancy::query()->searchByTitle('Backend')->get();
 
@@ -27,9 +27,21 @@ class VacancyTest extends TestCase
     }
 
     #[Test]
+    public function search_by_title_matches_company_name(): void
+    {
+        Vacancy::factory()->create(['title' => 'Software Engineer', 'company_name' => 'PT Backend Nusantara']);
+        Vacancy::factory()->create(['title' => 'UI/UX Designer', 'company_name' => 'PT Karya']);
+
+        $results = Vacancy::query()->searchByTitle('Backend')->get();
+
+        $this->assertCount(1, $results);
+        $this->assertSame('Software Engineer', $results->first()->title);
+    }
+
+    #[Test]
     public function search_by_title_is_case_insensitive(): void
     {
-        Vacancy::factory()->create(['title' => 'Backend Engineer']);
+        Vacancy::factory()->create(['title' => 'Backend Engineer', 'company_name' => 'PT Contoh']);
 
         $this->assertCount(1, Vacancy::query()->searchByTitle('backend')->get());
         $this->assertCount(1, Vacancy::query()->searchByTitle('ENGINEER')->get());
