@@ -45,12 +45,45 @@ export default function RegisterPage() {
     setFormError(null);
 
     const nextErrors: Record<string, string[]> = {};
-    if (!form.name.trim()) nextErrors.name = ["Nama wajib diisi."];
-    if (!form.email.trim()) nextErrors.email = ["Email wajib diisi."];
-    if (form.password.length < 8)
+    const trimmedName = form.name.trim();
+    if (!trimmedName) {
+      nextErrors.name = ["Nama wajib diisi."];
+    } else if (trimmedName.length < 3) {
+      nextErrors.name = ["Nama minimal 3 karakter."];
+    } else if (!/^[\p{L}\s'.-]+$/u.test(trimmedName)) {
+      nextErrors.name = [
+        "Nama hanya boleh berisi huruf, spasi, tanda hubung, apostrof, dan titik.",
+      ];
+    }
+
+    const trimmedEmail = form.email.trim();
+    if (!trimmedEmail) {
+      nextErrors.email = ["Email wajib diisi."];
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmedEmail)) {
+      nextErrors.email = ["Format email tidak valid."];
+    }
+
+    if (!form.password) {
+      nextErrors.password = ["Password wajib diisi."];
+    } else if (form.password.length < 8) {
       nextErrors.password = ["Password minimal 8 karakter."];
-    if (form.password !== form.password_confirmation)
+    } else if (
+      !/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/.test(form.password)
+    ) {
+      nextErrors.password = [
+        "Password harus memiliki huruf besar, huruf kecil, dan angka.",
+      ];
+    }
+
+    if (!form.password_confirmation) {
+      nextErrors.password_confirmation = ["Konfirmasi password wajib diisi."];
+    } else if (form.password !== form.password_confirmation) {
       nextErrors.password_confirmation = ["Konfirmasi password tidak cocok."];
+    }
+
+    if (!form.role) {
+      nextErrors.role = ["Peran wajib dipilih."];
+    }
 
     if (Object.keys(nextErrors).length > 0) {
       setErrors(nextErrors);
@@ -60,7 +93,11 @@ export default function RegisterPage() {
     setIsSubmitting(true);
 
     try {
-      await register(form);
+      await register({
+        ...form,
+        name: trimmedName,
+        email: trimmedEmail,
+      });
       router.push("/");
     } catch (error) {
       if (error instanceof ApiValidationError) {
@@ -100,7 +137,7 @@ export default function RegisterPage() {
       >
         <div className="flex flex-col gap-1.5">
           <label htmlFor="role" className="text-sm font-medium text-slate-800">
-            Saya adalah
+            Saya adalah <span className="text-red-500">*</span>
           </label>
           <select
             id="role"
@@ -122,7 +159,7 @@ export default function RegisterPage() {
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="name" className="text-sm font-medium text-slate-800">
-            Nama
+            Nama <span className="text-red-500">*</span>
           </label>
           <input
             id="name"
@@ -143,7 +180,7 @@ export default function RegisterPage() {
 
         <div className="flex flex-col gap-1.5">
           <label htmlFor="email" className="text-sm font-medium text-slate-800">
-            Email
+            Email <span className="text-red-500">*</span>
           </label>
           <input
             id="email"
@@ -168,7 +205,7 @@ export default function RegisterPage() {
             htmlFor="password"
             className="text-sm font-medium text-slate-800"
           >
-            Password
+            Password <span className="text-red-500">*</span>
           </label>
           <input
             id="password"
@@ -194,7 +231,7 @@ export default function RegisterPage() {
             htmlFor="password_confirmation"
             className="text-sm font-medium text-slate-800"
           >
-            Konfirmasi Password
+            Konfirmasi Password <span className="text-red-500">*</span>
           </label>
           <input
             id="password_confirmation"

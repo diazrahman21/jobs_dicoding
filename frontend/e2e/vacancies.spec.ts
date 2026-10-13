@@ -114,10 +114,10 @@ test.describe("Dicoding Jobs", () => {
     await page.getByTestId("register-role").selectOption("job_seeker");
     await page.getByTestId("register-name").fill("QA Seeker");
     await page.getByTestId("register-email").fill(uniqueEmail);
-    await page.getByTestId("register-password").fill("password123");
+    await page.getByTestId("register-password").fill("Password123");
     await page
       .getByTestId("register-password-confirmation")
-      .fill("password123");
+      .fill("Password123");
     await page.getByTestId("register-submit").click();
 
     await expect(page.getByTestId("current-user")).toBeVisible();

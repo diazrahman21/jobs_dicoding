@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/AuthProvider";
@@ -18,9 +19,16 @@ export function Header() {
       <div className="mx-auto flex w-full max-w-5xl items-center justify-between gap-4 px-4 py-4 sm:px-6">
         <Link
           href="/"
-          className="text-lg font-bold text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
+          className="flex items-center gap-2 text-lg font-bold text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
         >
-          Dicoding Jobs
+          <Image
+            src="/assets/icon.png"
+            alt="Dicoding Jobs"
+            width={28}
+            height={28}
+            className="h-7 w-7 shrink-0"
+          />
+          <span>Dicoding Jobs</span>
         </Link>
 
         <nav className="flex items-center gap-3 text-sm font-medium">

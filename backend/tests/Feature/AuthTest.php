@@ -19,8 +19,8 @@ class AuthTest extends TestCase
         $response = $this->postJson('/api/register', [
             'name' => 'Recruiter Baru',
             'email' => 'recruiter@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
             'role' => UserRole::Recruiter->value,
         ]);
 
@@ -40,8 +40,8 @@ class AuthTest extends TestCase
         $this->postJson('/api/register', [
             'name' => 'Job Seeker Baru',
             'email' => 'seeker@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
             'role' => UserRole::JobSeeker->value,
         ])->assertCreated()
             ->assertJsonPath('user.role', UserRole::JobSeeker->value);
@@ -61,6 +61,32 @@ class AuthTest extends TestCase
     }
 
     #[Test]
+    public function it_rejects_weak_password_registration(): void
+    {
+        $this->postJson('/api/register', [
+            'name' => 'User Baru',
+            'email' => 'weak@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'role' => UserRole::JobSeeker->value,
+        ])->assertStatus(422)
+            ->assertJsonValidationErrors(['password']);
+    }
+
+    #[Test]
+    public function it_rejects_invalid_name_registration(): void
+    {
+        $this->postJson('/api/register', [
+            'name' => 'User123!',
+            'email' => 'name@example.com',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
+            'role' => UserRole::JobSeeker->value,
+        ])->assertStatus(422)
+            ->assertJsonValidationErrors(['name']);
+    }
+
+    #[Test]
     public function it_rejects_duplicate_email_registration(): void
     {
         User::factory()->create(['email' => 'taken@example.com']);
@@ -68,8 +94,8 @@ class AuthTest extends TestCase
         $this->postJson('/api/register', [
             'name' => 'Duplikat',
             'email' => 'taken@example.com',
-            'password' => 'password123',
-            'password_confirmation' => 'password123',
+            'password' => 'Password123',
+            'password_confirmation' => 'Password123',
             'role' => UserRole::JobSeeker->value,
         ])->assertStatus(422)
             ->assertJsonValidationErrors(['email']);

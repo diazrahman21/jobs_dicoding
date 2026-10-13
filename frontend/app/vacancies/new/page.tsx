@@ -35,6 +35,7 @@ const EMPLOYMENT_OPTIONS: { value: EmploymentType; label: string }[] = [
   { value: "Part-time", label: "Part-time" },
   { value: "Contract", label: "Contract" },
   { value: "Internship", label: "Magang" },
+  { value: "Freelance", label: "Freelance" },
 ];
 
 interface FormState {
