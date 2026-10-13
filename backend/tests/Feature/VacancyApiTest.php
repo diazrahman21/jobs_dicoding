@@ -3,14 +3,21 @@
 namespace Tests\Feature;
 
 use App\Enums\EmploymentType;
+use App\Models\User;
 use App\Models\Vacancy;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Laravel\Sanctum\Sanctum;
 use PHPUnit\Framework\Attributes\Test;
 use Tests\TestCase;
 
 class VacancyApiTest extends TestCase
 {
     use RefreshDatabase;
+
+    private function recruiter(): User
+    {
+        return User::factory()->recruiter()->create();
+    }
 
     #[Test]
     public function it_lists_vacancies_with_pagination(): void
@@ -24,6 +31,7 @@ class VacancyApiTest extends TestCase
                 'data' => [
                     [
                         'id',
+                        'user_id',
                         'title',
                         'company_name',
                         'location',
@@ -48,24 +56,31 @@ class VacancyApiTest extends TestCase
     #[Test]
     public function it_creates_a_vacancy(): void
     {
+        $recruiter = $this->recruiter();
+        Sanctum::actingAs($recruiter);
+
         $payload = $this->validPayload();
 
         $response = $this->postJson('/api/vacancies', $payload);
 
         $response->assertCreated()
             ->assertJsonPath('data.title', $payload['title'])
-            ->assertJsonPath('data.employment_type', $payload['employment_type']);
+            ->assertJsonPath('data.employment_type', $payload['employment_type'])
+            ->assertJsonPath('data.user_id', $recruiter->id);
 
         $this->assertDatabaseHas('vacancies', [
             'title' => $payload['title'],
             'company_name' => $payload['company_name'],
             'employment_type' => $payload['employment_type'],
+            'user_id' => $recruiter->id,
         ]);
     }
 
     #[Test]
     public function it_returns_422_when_payload_is_invalid(): void
     {
+        Sanctum::actingAs($this->recruiter());
+
         $response = $this->postJson('/api/vacancies', [
             'title' => '',
             'employment_type' => 'Not-A-Real-Type',
@@ -82,6 +97,36 @@ class VacancyApiTest extends TestCase
                 'description',
                 'salary_max',
             ]);
+    }
+
+    #[Test]
+    public function guest_cannot_create_a_vacancy(): void
+    {
+        $this->postJson('/api/vacancies', $this->validPayload())
+            ->assertUnauthorized();
+    }
+
+    #[Test]
+    public function job_seeker_cannot_create_a_vacancy(): void
+    {
+        Sanctum::actingAs(User::factory()->jobSeeker()->create());
+
+        $this->postJson('/api/vacancies', $this->validPayload())
+            ->assertForbidden();
+    }
+
+    #[Test]
+    public function recruiter_cannot_modify_another_recruiters_vacancy(): void
+    {
+        $vacancy = Vacancy::factory()->for($this->recruiter())->create();
+
+        Sanctum::actingAs($this->recruiter());
+
+        $this->putJson("/api/vacancies/{$vacancy->id}", ['title' => 'Hijacked'])
+            ->assertForbidden();
+
+        $this->deleteJson("/api/vacancies/{$vacancy->id}")
+            ->assertForbidden();
     }
 
     #[Test]
@@ -123,7 +168,10 @@ class VacancyApiTest extends TestCase
     #[Test]
     public function it_updates_a_vacancy(): void
     {
-        $vacancy = Vacancy::factory()->create(['title' => 'Old Title']);
+        $recruiter = $this->recruiter();
+        $vacancy = Vacancy::factory()->for($recruiter)->create(['title' => 'Old Title']);
+
+        Sanctum::actingAs($recruiter);
 
         $this->putJson("/api/vacancies/{$vacancy->id}", ['title' => 'New Title'])
             ->assertOk()
@@ -138,7 +186,10 @@ class VacancyApiTest extends TestCase
     #[Test]
     public function it_deletes_a_vacancy(): void
     {
-        $vacancy = Vacancy::factory()->create();
+        $recruiter = $this->recruiter();
+        $vacancy = Vacancy::factory()->for($recruiter)->create();
+
+        Sanctum::actingAs($recruiter);
 
         $this->deleteJson("/api/vacancies/{$vacancy->id}")
             ->assertNoContent();
