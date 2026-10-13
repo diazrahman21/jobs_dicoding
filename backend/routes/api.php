@@ -9,6 +9,7 @@ Route::post('/register', [AuthController::class, 'register']);
 Route::post('/login', [AuthController::class, 'login']);
 
 Route::get('/vacancies', [VacancyController::class, 'index']);
+Route::middleware(['auth:sanctum', 'role:recruiter'])->get('/vacancies/mine', [VacancyController::class, 'mine']);
 Route::get('/vacancies/{vacancy}', [VacancyController::class, 'show']);
 
 Route::middleware('auth:sanctum')->group(function () {

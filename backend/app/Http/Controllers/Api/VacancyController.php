@@ -37,6 +37,17 @@ class VacancyController extends Controller
             ->setStatusCode(201);
     }
 
+    public function mine(Request $request): AnonymousResourceCollection
+    {
+        $vacancies = $request->user()
+            ->vacancies()
+            ->latest()
+            ->paginate(10)
+            ->withQueryString();
+
+        return VacancyResource::collection($vacancies);
+    }
+
     public function show(Vacancy $vacancy): VacancyResource
     {
         return new VacancyResource($vacancy);

@@ -20,13 +20,18 @@ class StoreVacancyRequest extends FormRequest
     {
         return [
             'title' => ['required', 'string', 'max:255'],
+            'position' => ['nullable', 'string', 'max:255'],
             'company_name' => ['required', 'string', 'max:255'],
             'location' => ['required', 'string', 'max:255'],
             'employment_type' => ['required', 'string', Rule::enum(EmploymentType::class)],
+            'candidates_needed' => ['nullable', 'integer', 'min:1'],
+            'deadline' => ['nullable', 'date'],
+            'experience_level' => ['nullable', 'string', 'max:50'],
             'description' => ['required', 'string'],
             'requirements' => ['nullable', 'string'],
             'salary_min' => ['nullable', 'integer', 'min:0'],
             'salary_max' => ['nullable', 'integer', 'min:0', 'gte:salary_min'],
+            'show_salary' => ['boolean'],
         ];
     }
 }

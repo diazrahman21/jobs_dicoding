@@ -1,16 +1,13 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
-import Link from "next/link";
+import { Inter } from "next/font/google";
+import Image from "next/image";
 import "./globals.css";
+import { AuthProvider } from "@/components/AuthProvider";
+import { Header } from "@/components/Header";
 import { QueryProvider } from "@/components/QueryProvider";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const inter = Inter({
+  variable: "--font-inter",
   subsets: ["latin"],
 });
 
@@ -21,37 +18,35 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html
-      lang="id"
-      className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
-    >
+    <html lang="id" className={`${inter.variable} h-full antialiased`}>
       <body className="min-h-full flex flex-col font-sans">
         <QueryProvider>
-          <header className="border-b border-slate-200 bg-white">
-            <div className="mx-auto flex w-full max-w-5xl items-center justify-between px-4 py-4 sm:px-6">
-              <Link
-                href="/"
-                className="text-lg font-bold text-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-              >
-                Dicoding Jobs
-              </Link>
-              <Link
-                href="/vacancies/new"
-                className="rounded-lg bg-brand-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-brand-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
-              >
-                Pasang Lowongan
-              </Link>
-            </div>
-          </header>
-          <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
-            {children}
-          </main>
-          <footer className="border-t border-slate-200 bg-white">
-            <div className="mx-auto w-full max-w-5xl px-4 py-6 text-sm text-slate-500 sm:px-6">
-              &copy; {new Date().getFullYear()} Dicoding Jobs. Dibuat untuk
-              technical exercise.
-            </div>
-          </footer>
+          <AuthProvider>
+            <Header />
+            <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-8 sm:px-6">
+              {children}
+            </main>
+            <footer className="border-t border-slate-200 bg-white">
+              <div className="mx-auto flex w-full max-w-5xl flex-col items-start gap-3 px-4 py-6 text-sm text-slate-500 sm:px-6">
+                <Image
+                  src="/assets/footer-logo.png"
+                  alt="Dicoding Jobs"
+                  width={138}
+                  height={35}
+                  className="h-8 w-auto"
+                />
+                <p className="text-left leading-relaxed">
+                  Dicoding Space
+                  <br />
+                  Jl. Batik Kumeli No.50, Sukaluyu,
+                  <br />
+                  Kec. Cibeunying Kaler, Kota Bandung
+                  <br />
+                  Jawa Barat 40123
+                </p>
+              </div>
+            </footer>
+          </AuthProvider>
         </QueryProvider>
       </body>
     </html>

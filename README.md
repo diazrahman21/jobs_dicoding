@@ -8,8 +8,12 @@ dua aplikasi dalam satu monorepo:
 
 Fitur yang didukung:
 
-1. **Recruiter** dapat membuat lowongan baru agar tampil di platform.
-2. **Job Seeker** dapat mencari lowongan berdasarkan judul (title).
+1. **Recruiter** dapat mendaftar/masuk, lalu membuat, melihat, mengubah, dan menghapus lowongan miliknya (CRUD) agar tampil di platform.
+2. **Job Seeker** dapat mendaftar/masuk, mencari lowongan berdasarkan judul (title), lalu **melamar** lowongan dan melihat daftar lamarannya.
+3. **Pengunjung publik** dapat melihat dan mencari lowongan tanpa login.
+
+Autentikasi memakai **Laravel Sanctum (API token)** dengan dua role: `recruiter` dan
+`job_seeker`. Hanya recruiter yang membuat lowongan, dan hanya job seeker yang melamar.
 
 ---
 
@@ -87,6 +91,17 @@ Frontend berjalan di `http://localhost:3000`.
 
 ---
 
+## Akun Demo (hasil seed)
+
+Setelah `php artisan migrate:fresh --seed`, tersedia dua akun untuk mencoba UI:
+
+| Role       | Email                     | Password   |
+| ---------- | ------------------------- | ---------- |
+| Recruiter  | `recruiter@dicoding.jobs` | `password` |
+| Job Seeker | `seeker@dicoding.jobs`    | `password` |
+
+---
+
 ## Menjalankan Semua Test
 
 ### 1. Backend — unit & integration (PHPUnit)
@@ -98,7 +113,8 @@ cd backend
 php artisan test
 ```
 
-Hasil yang diharapkan: semua test **hijau** (unit scope/validasi + feature API CRUD & search).
+Hasil yang diharapkan: semua test **hijau** (unit scope/validasi + feature API auth, role,
+ownership, aplikasi, CRUD & search).
 
 ### 2. E2E (Playwright)
 
@@ -141,16 +157,34 @@ npx tsc --noEmit
 
 Base URL: `http://localhost:8000/api`
 
-| Method   | Endpoint              | Deskripsi                                    |
-| -------- | --------------------- | -------------------------------------------- |
-| `GET`    | `/vacancies`          | Daftar lowongan (terbaru dulu, 10/halaman)   |
-| `GET`    | `/vacancies?search=`  | Filter daftar berdasarkan judul (title)      |
-| `GET`    | `/vacancies?page=2`   | Paginasi                                     |
-| `POST`   | `/vacancies`          | Membuat lowongan (201)                       |
-| `GET`    | `/vacancies/{id}`     | Detail lowongan (404 JSON bila tidak ada)    |
-| `PUT`    | `/vacancies/{id}`     | Update lowongan                              |
-| `PATCH`  | `/vacancies/{id}`     | Update sebagian lowongan                     |
-| `DELETE` | `/vacancies/{id}`     | Hapus lowongan (204)                         |
+Endpoint **publik**:
+
+| Method | Endpoint             | Deskripsi                                  |
+| ------ | -------------------- | ------------------------------------------ |
+| `POST` | `/register`          | Daftar akun (`role`: recruiter/job_seeker) |
+| `POST` | `/login`             | Login, mengembalikan `{ user, token }`     |
+| `GET`  | `/vacancies`         | Daftar lowongan (terbaru dulu, 10/halaman) |
+| `GET`  | `/vacancies?search=` | Filter daftar berdasarkan judul (title)    |
+| `GET`  | `/vacancies?page=2`  | Paginasi                                   |
+| `GET`  | `/vacancies/{id}`    | Detail lowongan (404 JSON bila tidak ada)  |
+
+Endpoint **butuh autentikasi** (header `Authorization: Bearer <token>`):
+
+| Method   | Endpoint                              | Role         | Deskripsi                              |
+| -------- | ------------------------------------- | ------------ | -------------------------------------- |
+| `GET`    | `/me`                                 | semua        | Data user yang sedang login            |
+| `POST`   | `/logout`                             | semua        | Cabut token aktif                      |
+| `GET`    | `/vacancies/mine`                     | `recruiter`  | Daftar lowongan milik sendiri           |
+| `POST`   | `/vacancies`                          | `recruiter`  | Membuat lowongan (201)                 |
+| `PUT`    | `/vacancies/{id}`                     | `recruiter`  | Update lowongan miliknya sendiri       |
+| `PATCH`  | `/vacancies/{id}`                     | `recruiter`  | Update sebagian lowongan miliknya      |
+| `DELETE` | `/vacancies/{id}`                     | `recruiter`  | Hapus lowongan miliknya (204)          |
+| `GET`    | `/applications`                       | `job_seeker` | Daftar lamaran milik user              |
+| `POST`   | `/vacancies/{id}/applications`        | `job_seeker` | Melamar lowongan (201, anti-duplikat)  |
+
+> Recruiter hanya bisa mengubah/menghapus lowongan **miliknya sendiri** (dijaga oleh
+> `VacancyPolicy`, mengembalikan **403** bila bukan pemilik). Job seeker yang melamar dua kali
+> mendapat **422**.
 
 ### Contoh: daftar + paginasi
 
@@ -192,12 +226,35 @@ curl "http://localhost:8000/api/vacancies?search=Backend&page=1"
 }
 ```
 
-### Contoh: membuat lowongan
+### Contoh: register & login
 
 ```bash
+curl -X POST "http://localhost:8000/api/register" \
+  -H "Content-Type: application/json" -H "Accept: application/json" \
+  -d '{
+    "name": "Budi Santoso",
+    "email": "budi@example.com",
+    "password": "password",
+    "password_confirmation": "password",
+    "role": "job_seeker"
+  }'
+
+curl -X POST "http://localhost:8000/api/login" \
+  -H "Content-Type: application/json" -H "Accept: application/json" \
+  -d '{ "email": "recruiter@dicoding.jobs", "password": "password" }'
+```
+
+Respons login: `{ "user": { ... }, "token": "1|..." }`. Simpan `token` untuk request terautentikasi.
+
+### Contoh: membuat lowongan (Recruiter)
+
+```bash
+TOKEN="<token hasil login recruiter>"
+
 curl -X POST "http://localhost:8000/api/vacancies" \
   -H "Content-Type: application/json" \
   -H "Accept: application/json" \
+  -H "Authorization: Bearer $TOKEN" \
   -d '{
     "title": "Backend Engineer",
     "company_name": "PT Teknologi Nusantara",
@@ -211,6 +268,15 @@ curl -X POST "http://localhost:8000/api/vacancies" \
 ```
 
 Respons: **201 Created** berisi `{ "data": { ... } }`.
+
+### Contoh: melamar lowongan (Job Seeker)
+
+```bash
+TOKEN="<token hasil login job seeker>"
+
+curl -X POST "http://localhost:8000/api/vacancies/1/applications" \
+  -H "Accept: application/json" -H "Authorization: Bearer $TOKEN"
+```
 
 ### Contoh: error validasi (422)
 
@@ -256,7 +322,17 @@ Respons: **201 Created** berisi `{ "data": { ... } }`.
 - **Design token placeholder**: karena referensi Figma belum tersedia, warna/radius/font
   diletakkan sebagai token di `frontend/app/globals.css` (`@theme`) sehingga mudah diganti
   dari satu tempat tanpa menyentuh komponen.
-- **Tanpa autentikasi** sesuai lingkup (hanya dua user story).
+- **Autentikasi Sanctum token**: login mengembalikan token API (bukan cookie/session) dan
+  frontend menyimpannya di `localStorage`, lalu mengirim `Authorization: Bearer <token>` pada
+  tiap request. Cocok untuk API lintas domain (frontend & backend beda port).
+- **Otorisasi berbasis role**: middleware `EnsureUserHasRole` (alias `role`) membatasi route
+  per role, sedangkan kepemilikan lowongan dijaga `VacancyPolicy` (hanya pemilik yang boleh
+  update/delete) — 403 untuk pelanggaran otorisasi.
+- **Anti-duplikat lamaran**: `ApplicationController` menolak lamaran kedua pada lowongan yang
+  sama dengan 422, divalidasi di server (bukan hanya di UI).
+- **Login/Register**: form menangani error 422 per kolom; komponen header menampilkan status
+  login dan menu sesuai role. Halaman pasang lowongan & lamaran dilindungi di sisi klien agar
+  pengunjung diarahkan login.
 
 ---
 
@@ -266,31 +342,39 @@ Respons: **201 Created** berisi `{ "data": { ... } }`.
 dicoding-jobs/
 ├── backend/                       # Laravel 12
 │   ├── app/
-│   │   ├── Enums/EmploymentType.php
+│   │   ├── Enums/{EmploymentType,UserRole}.php
 │   │   ├── Http/
-│   │   │   ├── Controllers/Api/VacancyController.php
-│   │   │   ├── Requests/{Store,Update}VacancyRequest.php
-│   │   │   └── Resources/VacancyResource.php
-│   │   └── Models/Vacancy.php
+│   │   │   ├── Controllers/Api/{Auth,Vacancy,Application}Controller.php
+│   │   │   ├── Middleware/EnsureUserHasRole.php
+│   │   │   ├── Requests/{Register,Login,Store,Update}*Request.php
+│   │   │   └── Resources/{Vacancy,User,Application}Resource.php
+│   │   ├── Models/{User,Vacancy,Application}.php
+│   │   └── Policies/VacancyPolicy.php
 │   ├── config/cors.php
+│   ├── bootstrap/app.php          # alias 'role' + shouldRenderJsonWhen
 │   ├── database/
-│   │   ├── factories/VacancyFactory.php
-│   │   ├── migrations/*_create_vacancies_table.php
+│   │   ├── factories/{Vacancy,Application,User}Factory.php
+│   │   ├── migrations/*_{users,vacancies,applications}_table.php
 │   │   └── seeders/{Database,Vacancy}Seeder.php
 │   ├── routes/api.php
 │   └── tests/
-│       ├── Feature/VacancyApiTest.php
+│       ├── Feature/{VacancyApi,Auth,Application}Test.php
 │       └── Unit/VacancyTest.php
 ├── frontend/                      # Next.js 16
 │   ├── app/
 │   │   ├── layout.tsx
 │   │   ├── page.tsx               # daftar + pencarian
+│   │   ├── login/page.tsx
+│   │   ├── register/page.tsx
+│   │   ├── my-applications/page.tsx
+│   │   ├── my-vacancies/page.tsx     # daftar lowongan milik recruiter (CRUD)
 │   │   └── vacancies/
-│   │       ├── [id]/page.tsx      # detail
-│   │       └── new/page.tsx       # form buat lowongan
-│   ├── components/{JobCard,SearchBar,QueryProvider}.tsx
-│   ├── lib/{api,format,useDebouncedValue}.ts
-│   ├── types/vacancy.ts
+│   │       ├── [id]/page.tsx      # detail + tombol Lamar/Edit/Hapus
+│   │       ├── [id]/edit/page.tsx # form ubah lowongan (khusus recruiter)
+│   │       └── new/page.tsx       # form buat lowongan (khusus recruiter)
+│   ├── components/{Header,AuthProvider,JobCard,SearchBar,QueryProvider}.tsx
+│   ├── lib/{api,auth,format,useDebouncedValue}.ts
+│   ├── types/{vacancy,auth}.ts
 │   ├── e2e/vacancies.spec.ts
 │   └── playwright.config.ts
 ├── .gitignore

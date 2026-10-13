@@ -40,6 +40,13 @@ class VacancyFactory extends Factory
                 'Machine Learning Engineer',
                 'Technical Writer',
             ]),
+            'position' => fake()->randomElement([
+                'Android Developer',
+                'iOS Developer',
+                'Frontend Developer',
+                'Backend Developer',
+                'Full Stack Developer',
+            ]),
             'company_name' => fake()->randomElement([
                 'PT Teknologi Nusantara',
                 'PT Digital Kreasi',
@@ -62,8 +69,18 @@ class VacancyFactory extends Factory
                 'Remote',
             ]),
             'employment_type' => fake()->randomElement(EmploymentType::values()),
+            'candidates_needed' => fake()->numberBetween(1, 10),
+            'deadline' => fake()->dateTimeBetween('now', '+2 months')->format('Y-m-d'),
+            'experience_level' => fake()->randomElement([
+                'Fresh Graduate',
+                '1-3 tahun',
+                '3-5 tahun',
+                '5-10 tahun',
+                'Lebih dari 10 tahun',
+            ]),
             'salary_min' => $salaryMin,
             'salary_max' => $salaryMin + fake()->numberBetween(2_000_000, 10_000_000),
+            'show_salary' => fake()->boolean(70),
             'description' => fake()->paragraphs(3, true),
             'requirements' => fake()->paragraphs(2, true),
         ];

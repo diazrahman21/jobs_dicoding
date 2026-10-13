@@ -19,11 +19,16 @@ class Vacancy extends Model
      */
     protected $fillable = [
         'title',
+        'position',
         'company_name',
         'location',
         'employment_type',
+        'candidates_needed',
+        'deadline',
+        'experience_level',
         'salary_min',
         'salary_max',
+        'show_salary',
         'description',
         'requirements',
     ];
@@ -35,8 +40,11 @@ class Vacancy extends Model
     {
         return [
             'employment_type' => EmploymentType::class,
+            'candidates_needed' => 'integer',
+            'deadline' => 'date',
             'salary_min' => 'integer',
             'salary_max' => 'integer',
+            'show_salary' => 'boolean',
         ];
     }
 

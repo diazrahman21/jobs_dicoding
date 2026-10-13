@@ -1,3 +1,4 @@
+import Image from "next/image";
 import Link from "next/link";
 import { formatSalaryRange } from "@/lib/format";
 import type { Vacancy } from "@/types/vacancy";
@@ -13,8 +14,18 @@ export function JobCard({ vacancy }: JobCardProps) {
       data-testid="job-card"
       className="group block rounded-card border border-slate-200 bg-white p-5 shadow-sm transition hover:border-brand-300 hover:shadow-md focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2"
     >
-      <div className="flex flex-col gap-2">
-        <h3
+      <div className="flex items-start gap-4">
+        <div className="shrink-0 overflow-hidden rounded-lg border border-slate-200 bg-slate-50 p-1.5">
+          <Image
+            src="/assets/company-logo.png"
+            alt=""
+            width={40}
+            height={40}
+            className="h-10 w-10 rounded-md object-contain"
+          />
+        </div>
+        <div className="flex min-w-0 flex-col gap-2">
+          <h3
           data-testid="vacancy-title"
           className="text-lg font-semibold text-slate-900 group-hover:text-brand-700"
         >
@@ -34,6 +45,7 @@ export function JobCard({ vacancy }: JobCardProps) {
         <p className="text-sm font-semibold text-slate-900">
           {formatSalaryRange(vacancy.salary_min, vacancy.salary_max)}
         </p>
+        </div>
       </div>
     </Link>
   );
